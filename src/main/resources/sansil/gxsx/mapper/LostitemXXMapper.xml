@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="sansil.gxsx.mapper.LostitemXXMapper">
+	
+	
+	<select id="list" resultType="LostItemPicVo">
+
+		select lostitem.losub, lostitem.louid , lostitem.lono , lostitem.lodate , lostitem.locon , lostitem.loano , lostitem.loplace , lostitem.locname , lostitem.lofin , 
+		(select lopicname from lostpic where lostpic.lopno = lostitem.lono AND ROWNUM= 1)
+    	from lostitem left join lostpic on lostitem.lono = lostpic.lopno GROUP BY lostitem.lono , lostitem.losub, lostitem.louid , lostitem.lono , lostitem.lodate , lostitem.locon , lostitem.loano , lostitem.loplace , lostitem.locname , lostitem.lofin	</select>
+	<select id="selectCountLostitem" resultType="Long">
+		select count(*) from Lostitem 
+	</select>
+	
+	<select id="selectPerPage" resultType="LostItemPicVo" parameterType="Pagination">
+
+		<![CDATA[
+		select * from (select aa.*, ROWNUM rnum from (
+        select lostitem.losub, lostitem.louid , lostitem.lono , lostitem.lodate , lostitem.locon , lostitem.loano , lostitem.loplace , lostitem.locname , lostitem.lofin , 
+		(select lopicname from lostpic where lostpic.lopno = lostitem.lono AND ROWNUM= 1) as lopicname
+    	from lostitem left join lostpic on lostitem.lono = lostpic.lopno GROUP BY lostitem.lono , lostitem.losub, lostitem.louid , lostitem.lono , lostitem.lodate , lostitem.locon , lostitem.loano , lostitem.loplace , lostitem.locname , lostitem.lofin order by lono desc)
+        aa) where rnum between #{startRow} and #{endRow} 
+		]]>
+	</select>
+	
+
+	<insert id="insert" parameterType="LostItemPicVo">
+		<selectKey keyProperty="lono" resultType="int" order="BEFORE">
+			select LONO_SEQ_PK.nextval from DUAL
+		</selectKey>
+		insert into LOSTITEM values(#{lono}, #{louid}, #{losub}, #{locon}, SYSDATE, #{loano}, #{loplace}, #{locname}, #{logift}, 0)
+	</insert>
+	
+	<insert id="insert1" parameterType="LostItemPicVo">
+		insert into LOSTPIC values(LOSTPIC_SEQ_PK.nextval, #{lono}, #{lopicname})
+	</insert>		
+	
+	<select id="Content" resultType="LostItemPicVo" parameterType="int">
+	<![CDATA[
+		select it.lono, it.louid, it.losub, it.locon, it.lodate, it.loano, it.loplace, it.locname, it.lofin, pic.lopicname 
+		from lostitem it left outer join lostpic pic on it.lono = pic.lopno
+		where lono = #{lono}
+			]]>
+	</select>
+	
+	<select id="getLostRelated" resultType="LostItemPicVo">
+		<![CDATA[
+		select * from (select aa.*, ROWNUM rnum from (
+        select lostitem.losub, lostitem.louid , lostitem.lono , lostitem.lodate , lostitem.locon , lostitem.loano , lostitem.loplace , lostitem.locname , lostitem.lofin , 
+		(select lopicname from lostpic where lostpic.lopno = lostitem.lono AND ROWNUM= 1) as lopicname
+    	from lostitem left join lostpic on lostitem.lono = lostpic.lopno GROUP BY lostitem.lono , lostitem.losub, lostitem.louid , lostitem.lono , lostitem.lodate , lostitem.locon , lostitem.loano , lostitem.loplace , lostitem.locname , lostitem.lofin order by lono desc)
+        aa) where ROWNUM <=8 
+		]]>	
+<!-- 		select * from (select ROWNUM rnum, aa.* from (select * from lostitem left outer join lostpic on  -->
+<!-- 		lostitem.lono = lostpic.lopno join area on lostitem.loano = area.ano order by LONO desc)aa) -->
+<!-- 		where ROWNUM <=8 -->
+		
+		
+		
+		
+		
+	</select>
+	
+	<select id="area" resultType="String" parameterType="int">
+	    select acity from area where ano=(select loano from lostitem where lono=#{lono})
+	</select>
+	
+	<delete id="delete" parameterType="LostItemPicVo">
+		delete from LOSTITEM where LONO=#{lono}
+	</delete>
+
+	<select id="Updatef" resultType="LostItemPicVo" parameterType="LostItemPicVo">
+		select *from LOSTITEM,LOSTPIC where LONO=#{lono} and LOPNO=#{lopno}
+	</select>
+	<update id="Update" parameterType="LostItemPicVo">
+		update LOSTITEM set LOUID=#{louid}, LOCNAME=#{locname}, LOSUB=#{losub}, LOCON=#{locon}, LOANO=#{loano}, LOPLACE=#{loplace}, LOGIFT=#{logift},LOFIN=0 where LONO=#{lono}
+	</update> 
+	<update id="Update1" parameterType="LostItemPicVo">
+		update LOSTPIC set LOPICNAME=#{lopicname} where LOPNO=#{lopno}
+	</update> 
+	<insert id="uploadpic" parameterType="Map">
+		insert into LOSTPIC values(LOSTPIC_SEQ_PK.nextval, #{lopno}, #{lopicname})
+	</insert>
+	
+	<select id="selectByName" resultType="LostItemPicVo" parameterType="String">
+	     select * from LOSTITEM join LOSTPIC on lostitem.lono = lostpic.lopno join area on lostitem.loano = area.ano
+		 where lostitem.LOSUB like '%'||#{losub}||'%' and lostitem.LODATE like '%'||#{lodate}||'%' lostitem.LOCON like '%'||#{locon}||'%' order by LONO desc
+	</select>
+
+
+
+	<select id="selectCount2" resultType="long" parameterType="String">
+		select COUNT(LONO) from LOSTITEM where LOSUB like '%'||#{losub}||'%' order by LONO desc
+	</select>
+
+	<select id="selectPerPage2" resultType="LostItemPicVo" parameterType="FindListVo">
+		<![CDATA[
+		select * from (select ROWNUM rnum, aa.* from (select * from lostitem left outer join lostpic on 
+		lostitem.lono = lostpic.lopno join area on lostitem.loano = area.ano where losub like '%'||#{keyword}||'%' order by LONO desc)aa)
+		where rnum>#{startRow} and rnum<=#{endRow}
+		]]>
+	</select>
+
+	<select id="selectCountSearch" resultType="long" parameterType="hashmap">
+	<choose>
+		<when test="date != null">
+		    select count(*) from LOSTITEM join area on lostitem.loano = area.ano
+		    where lostitem.LOSUB like '%'||#{lostitem.losub}||'%' and lostitem.LOCNAME like'%'||#{lostitem.locname}||'%'
+		    <if test="area != null">
+	    		and lostitem.loano = #{area}
+	    	</if>
+		    order by LOSTITEM.LODATE desc
+		</when>
+		<otherwise>
+		    select count(*) from LOSTITEM join area on lostitem.loano = area.ano
+		    where lostitem.LOSUB like '%'||#{lostitem.losub}||'%' and lostitem.LOCNAME like'%'||#{lostitem.locname}||'%' 
+		    <if test="area != null">
+	    		and lostitem.loano = #{area}
+	    	</if> 		   
+		    and lostitem.LODATE BETWEEN TO_DATE (#{lostitem.startDate}, 'YY/MM/DD')
+		    AND TO_DATE(#{lostitem.endDate}, 'YY/MM/DD')  order by LOSTITEM.LODATE desc
+		</otherwise>
+	</choose>
+	</select>
+
+	<!-- START 검색옵션 쿼리 -->
+	<select id="selectCategory" resultType="sansil.gxsx.domain.Category">
+		select * from CATEGORY
+	</select>
+	<select id="selectArea" resultType="sansil.gxsx.domain.Area">
+		select * from AREA
+	</select>
+	<!-- END 검색옵션 쿼리 -->
+
+	<!-- START 검색 쿼리 -->
+	<select id="selectSearch" resultType="LostItemPicVo" parameterType="hashmap">
+		<choose>
+			<when test="date != null">
+		 		select * from (
+		 		select ROWNUM rnum, aa.* from (
+				    select * from LOSTITEM join area on lostitem.loano = area.ano
+				    where lostitem.LOSUB like '%'||#{lostitem.losub}||'%' and lostitem.LOCNAME like'%'||#{lostitem.locname}||'%'
+			    	<if test="area != null">
+			    		and lostitem.loano = #{area}
+			    	</if>
+				<![CDATA[
+				    order by LOSTITEM.LODATE desc
+		 		)aa)
+		 		where rnum>=#{page.startRow} and rnum<=#{page.endRow} 
+				]]>	
+			</when>
+			<otherwise>
+		 		select * from (
+		 		select ROWNUM rnum, aa.* from (
+				    select * from LOSTITEM join area on lostitem.loano = area.ano
+				    where lostitem.LOSUB like '%'||#{lostitem.losub}||'%' and lostitem.LOCNAME like'%'||#{lostitem.locname}||'%' 
+				    and lostitem.LODATE BETWEEN TO_DATE (#{lostitem.startDate}, 'YY/MM/DD') 
+			    	<if test="area != null">
+			    		and lostitem.loano = #{area}
+			    	</if>
+				<![CDATA[
+				    AND TO_DATE(#{lostitem.endDate}, 'YY/MM/DD')  order by LOSTITEM.LODATE desc
+		 		)aa)
+		 		where rnum>=#{page.startRow} and rnum<=#{page.endRow} 
+				]]>	
+			</otherwise>
+		</choose>
+	</select>
+
+	<select id="selectLostPic" resultType="LostPic" parameterType="long">
+		select * from LOSTPIC where lopno = #{lono}
+	</select>
+	<!-- END 검색 쿼리 -->
+</mapper>

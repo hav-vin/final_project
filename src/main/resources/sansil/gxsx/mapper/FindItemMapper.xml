@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="sansil.gxsx.mapper.FindItemMapper">
+	
+	
+	<select id="selectFinditem" resultType="FindItem">
+		select * from FINDITEM where FIUID = 'cclubley3'
+	</select>	
+	
+	<select id="selectByWriter" resultType="FindItem" parameterType="FindListVo">
+		<![CDATA[
+ 		select * from (select ROWNUM rnum, aa.* from (select * from FINDITEM where WRITER like '%'||#{keyword}||'%' order by FINO desc)aa)
+ 		where rnum>#{startRow} and rnum<=#{endRow} 
+		]]>
+	</select>
+	
+	<insert id="insert" parameterType="FindItem">
+		insert into FindItem values(FINDITEM_SEQ_PK.nextval, #{fiuid}, #{fisub}, #{ficon}, SYSDATE, #{fiano}, #{fiplace}, #{fistor}, #{ficname}, #{fifin})
+	</insert>
+	
+	<insert id="insertBoard" parameterType="FindItem">
+		<selectKey keyProperty="fino" resultType="long" order="BEFORE">
+			select FINO_SEQ_PK.nextval from DUAL
+		</selectKey>
+		INSERT INTO FINDITEM 
+		(	
+			FINO,
+			FIUID,
+			FISUB,
+			FICON,
+			FIDATE,
+			FIANO,
+			FIPLACE,
+			FISTOR,
+			FICNAME,
+			FIFIN
+			
+		) VALUES (
+			#{fino},
+			#{fiuid},
+			#{fisub},
+			#{ficon},
+			SYSDATE,
+			#{fiano},
+			#{fiplace},
+			#{fistor},
+			#{ficname},
+			0
+		)
+		
+	</insert>
+	
+	<insert id="insertBoardPic" parameterType="java.util.Map">
+		INSERT INTO FINDPIC 
+		(	
+			FIPICNO,
+			FIPNO,
+			FIPICNAME
+			
+		) VALUES (
+			FINDPIC_SEQ_PK.nextval,
+			#{fipno},
+			#{fipicname}
+		)
+	</insert>
+	
+	<select id="Updatef" resultType="FindItPIc" parameterType="FindItPIc">
+		select *from FINDITEM,FINDPIC where FINO=#{fino} and FIPNO=#{fipno}
+	</select>
+	
+	<update id="Update" parameterType="FindItPIc">
+		update FINDITEM set FIUID=#{fiuid}, FICNAME=#{ficname}, FISUB=#{fisub}, FICON=#{ficon}, FIANO=#{fiano}, FIPLACE=#{fiplace}, FISTOR=#{fistor} ,FIFIN=0, FIDATE=#{fidate} where FINO=#{fino}
+	</update>
+	
+	<delete id="delete" parameterType="long">
+		delete from FINDITEM where FINO=#{fino}
+	</delete>
+	
+	<!-- ////////////////////////////////////////// -->
+	<select id="selectByName" resultType="FindItPic" parameterType="String">
+	     select * from FINDITEM join FINDPIC on finditem.fino = findpic.fipno join area on finditem.fiano = area.ano
+		 where finditem.FISUB like '%'||#{fisub}||'%' and finditem.FIDATE like '%'||#{fidate}||'%' finditem.FICON like '%'||#{ficon}||'%' order by FINO desc
+	</select>
+	
+	<select id="selectCount" resultType="long">
+		select COUNT(FINO) from FINDITEM
+	</select>
+	
+	<select id="selectCount2" resultType="long" parameterType="String">
+		select COUNT(FINO) from FINDITEM where FISUB like '%'||#{fisub}||'%' order by FINO desc
+	</select>
+	
+<!-- 	<select id="selectPerPage" resultType="FindItPic" parameterType="FindListVo"> -->
+<!-- 		<![CDATA[ -->
+<!--  		select * from (select ROWNUM rnum, aa.* from (select * from finditem left outer join findpic on   -->
+<!--  		finditem.fino = findpic.fipno join area on finditem.fiano = area.ano order by FINO desc)aa)  -->
+<!--  		where rnum>#{startRow} and rnum<=#{endRow}  -->
+<!--  		]]> -->
+<!-- 	</select> -->
+	
+	<select id="selectCountFinditem" resultType="Long">
+		select count(*) from FINDITEM
+	</select>
+	
+	<select id="selectPerPage" resultType="FindItPic" parameterType="Pagination">
+<!-- 		<![CDATA[
+		select * from (select ROWNUM rnum, aa.* from (select * from finditem join findpic on finditem.fino = findpic.fipno join area on finditem.fiano = area.ano
+		 order by FINO desc) aa) where rnum between #{startRow} and #{endRow}
+		]]> -->
+		
+		select * from (select aa.*, ROWNUM rnum from (
+    	select finditem.fisub, finditem.fiuid , finditem.fino , finditem.fidate , finditem.ficon , finditem.fiano , finditem.fiplace , finditem.ficname , finditem.fifin , 
+		(select fipicname from findpic where findpic.fipno = finditem.fino AND ROWNUM= 1) as fipicname
+  		from finditem left join findpic on finditem.fino = findpic.fipno GROUP BY finditem.fino , finditem.fisub, finditem.fiuid , finditem.fino , finditem.fidate , finditem.ficon , finditem.fiano , finditem.fiplace , finditem.ficname , finditem.fifin order by fidate desc)
+    	aa) where rnum between #{startRow} and #{endRow}
+	</select>
+	
+	<select id="selectPerPage2" resultType="FindItPic" parameterType="FindListVo">
+		<![CDATA[
+		select * from (select ROWNUM rnum, aa.* from (select * from finditem left outer join findpic on 
+		finditem.fino = findpic.fipno join area on finditem.fiano = area.ano where fisub like '%'||#{keyword}||'%' order by FINO desc)aa)
+		where rnum>#{startRow} and rnum<=#{endRow}
+		]]>
+	</select>
+	
+	<select id="selectBySeq" resultType="FindItPic" parameterType="long">
+		select it.fino, it.fiuid, it.fisub, it.ficon, it.fidate, it.fiano, it.fiplace, it.fistor, it.ficname, it.fifin, pic.fipicname from finditem it left outer join findpic pic on it.fino = pic.fipno where it.fino = #{fino}
+	</select>
+	
+	<select id="area" resultType="String" parameterType="long">
+		select acity from area where ano=(select fiano from findItem where fino=#{fino})
+	</select>
+		
+	<select id="getFindRelated" resultType="FindItPic">
+		<![CDATA[
+		select * from (select aa.*, ROWNUM rnum from (
+    select finditem.fisub, finditem.fiuid , finditem.fino , finditem.fidate , finditem.ficon , finditem.fiano , finditem.fiplace , finditem.ficname , finditem.fifin , 
+		(select fipicname from findpic where findpic.fipno = finditem.fino AND ROWNUM= 1) as fipicname
+  	from finditem left join findpic on finditem.fino = findpic.fipno GROUP BY finditem.fino , finditem.fisub, finditem.fiuid , finditem.fino , finditem.fidate , finditem.ficon , finditem.fiano , finditem.fiplace , finditem.ficname , finditem.fifin order by fino desc)
+    aa) where ROWNUM <=8
+		]]>	
+	</select>
+	
+	<!-- /////////////////////////////////////코멘트 -->
+	<select id="FindCommentList" resultType="FiComments" parameterType="int">
+		select * from FICOMMENTS where FINO = #{fino} order by COGROUP, CODATE
+	</select>
+	
+	<select id="selectCountSearch" resultType="long" parameterType="hashmap">
+	<choose>
+		<when test="date != null">
+		    select count(*) from FINDITEM join area on finditem.fiano = area.ano
+		    where finditem.FISUB like '%'||#{finditem.fisub}||'%' and finditem.FICNAME like'%'||#{finditem.ficname}||'%'
+		    <if test="area != null">
+	    		and finditem.fiano = #{area}
+	    	</if>
+		    order by FINDITEM.FIDATE desc
+		</when>
+		<otherwise>
+		    select count(*) from FINDITEM join area on finditem.fiano = area.ano
+		    where finditem.FISUB like '%'||#{finditem.fisub}||'%' and finditem.FICNAME like'%'||#{finditem.ficname}||'%' 
+		    <if test="area != null">
+	    		and finditem.fiano = #{area}
+	    	</if> 		   
+		    and finditem.FIDATE BETWEEN TO_DATE (#{finditem.startDate}, 'YY/MM/DD')
+		    AND TO_DATE(#{finditem.endDate}, 'YY/MM/DD')  order by FINDITEM.FIDATE desc
+		</otherwise>
+	</choose>
+	</select>
+
+	<!-- START 검색옵션 쿼리 -->
+	<select id="selectCategory" resultType="sansil.gxsx.domain.Category">
+		select * from CATEGORY
+	</select>
+	<select id="selectArea" resultType="sansil.gxsx.domain.Area">
+		select * from AREA
+	</select>
+	<!-- END 검색옵션 쿼리 -->
+
+	<!-- START 검색 쿼리 -->
+	<select id="selectSearch" resultType="FindItPic" parameterType="hashmap">
+		<choose>
+			<when test="date != null">
+		 		select * from (
+		 		select ROWNUM rnum, aa.* from (
+				    select * from FINDITEM join area on finditem.fiano = area.ano
+				    where finditem.FISUB like '%'||#{finditem.fisub}||'%' and finditem.FICNAME like'%'||#{finditem.ficname}||'%'
+			    	<if test="area != null">
+			    		and finditem.fiano = #{area}
+			    	</if>
+				<![CDATA[
+				    order by FINDITEM.FIDATE desc
+		 		)aa)
+		 		where rnum>=#{page.startRow} and rnum<=#{page.endRow} 
+				]]>	
+			</when>
+			<otherwise>
+		 		select * from (
+		 		select ROWNUM rnum, aa.* from (
+				    select * from FINDITEM join area on finditem.fiano = area.ano
+				    where finditem.FISUB like '%'||#{finditem.fisub}||'%' and finditem.FICNAME like'%'||#{finditem.ficname}||'%' 
+				    and finditem.FIDATE BETWEEN TO_DATE (#{finditem.startDate}, 'YY/MM/DD') 
+			    	<if test="area != null">
+			    		and finditem.fiano = #{area}
+			    	</if>
+				<![CDATA[
+				    AND TO_DATE(#{finditem.endDate}, 'YY/MM/DD')  order by FINDITEM.FIDATE desc
+		 		)aa)
+		 		where rnum>=#{page.startRow} and rnum<=#{page.endRow} 
+				]]>	
+			</otherwise>
+		</choose>
+	</select>
+	
+	<select id="selectFindPic" resultType="FindPic" parameterType="long">
+		select * from FINDPIC where fipno = #{fino}
+	</select>
+	<!-- END 검색 쿼리 -->
+</mapper>

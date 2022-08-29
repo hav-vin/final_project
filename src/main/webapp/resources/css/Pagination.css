@@ -1,0 +1,9 @@
+@charset "UTF-8";
+
+.pagination {
+	display: block;
+	text-align: center;
+}
+.pagination > li > a {
+	float: none;
+}

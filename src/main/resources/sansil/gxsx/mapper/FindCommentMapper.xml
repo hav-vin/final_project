@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="sansil.gxsx.mapper.FindCommentMapper">
+		
+	<select id="FindCommentList" resultType="FiComments" parameterType="int">
+		select * from FICOMMENTS where FINO = #{fino} order By COGROUP desc, PCOM asc, DEPTH asc 
+	</select>
+	
+	<insert id="FindCommentInsert" parameterType="FiComments">
+		<selectKey keyProperty="comno" resultType="int" order="BEFORE">
+			select FINDCOMMENTS_SEQ_PK.nextval from dual
+		</selectKey>
+		INSERT into FICOMMENTS 
+		values(#{comno}, #{fino}, #{userid}, SYSDATE, #{contents}, 0, 0, #{comno})
+	</insert>
+	
+	<!-- 대댓글 -->
+	<insert id="CommentReplyInsert" parameterType="FiComments">
+		<selectKey keyProperty="pcom" resultType="int" order="BEFORE">
+			select nvl(max(PCOM), 0) from FICOMMENTS where COMNO = #{comno}
+		</selectKey>
+		insert into FICOMMENTS values(FINDCOMMENTS_SEQ_PK.nextval, #{fino}, #{userid}, SYSDATE, #{contents}, (#{depth}+1), (#{pcom}+1), #{cogroup})
+	</insert>
+	
+	<update id="FindCommentUpdate" parameterType="FiComments">
+		UPDATE FICOMMENTS set CONTENTS = #{contents}
+		where COMNO = #{comno}
+	</update>
+	
+	<delete id="FindCommentDelete" parameterType="FiComments">
+		delete from FICOMMENTS  where COMNO = #{comno} or COGROUP = #{comno}
+	</delete>
+	
+	<select id="reSelectComment" resultType="FiComments" parameterType="FiComments">
+		select * from FICOMMENTS where COMNO = #{comno} order By COMNO desc
+	</select>
+</mapper>

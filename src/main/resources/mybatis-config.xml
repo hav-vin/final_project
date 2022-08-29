@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+  PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+
+   <typeAliases>
+         <typeAlias alias="LostItem" type="sansil.gxsx.domain.LostItem"/>
+		 <typeAlias alias="LostItemVo" type="sansil.gxsx.domain.LostItemVo"/>
+		 <typeAlias alias="FindItem" type="sansil.gxsx.domain.FindItem"/>
+		 <typeAlias alias="LostPic" type="sansil.gxsx.domain.LostPic"/>
+		 
+		 <typeAlias alias="Users" type="sansil.gxsx.domain.Users"/>
+         <typeAlias alias="UsersVo" type="sansil.gxsx.domain.UsersVo"/>
+         <typeAlias alias="FindPic" type="sansil.gxsx.domain.FindPic"/>
+         <typeAlias alias="LostListVo" type="sansil.gxsx.domain.LostListVo"/>
+         <typeAlias alias="FindListVo" type="sansil.gxsx.domain.FindListVo"/>
+         <typeAlias alias="Question" type="sansil.gxsx.domain.Question"/>
+		 <typeAlias alias="Pagination" type="sansil.gxsx.domain.Pagination"/>
+         <typeAlias alias="FindItPic" type="sansil.gxsx.domain.FindItPic"/>
+         <typeAlias alias="FiComments" type="sansil.gxsx.domain.FiComments"/>
+         <typeAlias alias="LostItemPicVo" type="sansil.gxsx.domain.LostItemPicVo"/>
+         <typeAlias alias="LoComments" type="sansil.gxsx.domain.LoComments"/>
+         <typeAlias alias="Notice" type="sansil.gxsx.domain.Notice"/>
+         <typeAlias alias="NoticeVo" type="sansil.gxsx.domain.NoticeVo"/>
+   </typeAliases>
+   
+   <mappers>
+         <mapper resource="sansil/gxsx/mapper/LostItemMapper.xml"/>
+         <mapper resource="sansil/gxsx/mapper/TempMapper.xml"/>
+         <mapper resource="sansil/gxsx/mapper/FindItemMapper.xml"/>
+         
+   </mappers>
+   
+</configuration>

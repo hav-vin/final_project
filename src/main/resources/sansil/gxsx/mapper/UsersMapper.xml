@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+	<mapper namespace="sansil.gxsx.mapper.UsersMapper">
+	
+	<select id="selectPerPage" resultType="Users" parameterType="UsersVo">
+	    <![CDATA[
+		select * from (select ROWNUM rnum, aa.* from (select * from USERS order by USERSID desc) aa) 
+		where rnum between #{start} and #{last}
+		]]>
+	</select>
+	
+	<select id="listLostitem" resultType="Users">
+		select * from lostitem where LOUID = 'mondaygirl' order by FINO desc
+	</select>
+	
+	<select id="selectCount" resultType="long">
+		select COUNT(usersid) from users
+	</select>
+	
+	<select id="listFinditem" resultType="Users">
+		select * from finditem where FIUID = 'mondaygirl' order by FINO desc
+	</select>
+	
+	<delete id="delete" parameterType="String">
+		delete from USERSID where UserId= 'mondaygirl'
+	</delete>
+	
+	<delete id="deleteAll">
+	     delete from USERSID
+	</delete>
+	
+	<select id="selectCountLostItem" resultType="long" parameterType="String">
+		select count(*) from LOSTITEM item join LOSTPIC pic on item.LONO = pic.LOPNO where
+		LOUID=#{query} order by LONO desc
+	</select>
+	
+	<select id="selectCountFindItem" resultType="long" parameterType="String">
+		select count(*) from FINDITEM item join FINDPIC pic on item.FINO = pic.FIPNO where
+		FIUID=#{query} order by FINO desc
+	</select>
+	
+	<select id="lostList" resultType="LostListVo" parameterType="LostListVo">
+	    <![CDATA[
+		select * from (select ROWNUM rnum, aa.* from (select * from LOSTITEM item join LOSTPIC pic on item.LONO = pic.LOPNO where
+		LOUID=#{louid}) aa) where rnum between #{paging.startRow} and #{paging.endRow}
+		]]>
+	</select>
+	
+	<select id="findList" resultType="FindListVo" parameterType="FindListVo">
+		select * from (select ROWNUM rnum, aa.* from (select * from FINDITEM item join FINDPIC pic on item.FINO = pic.FIPNO where
+		FIUID=#{fiuid}) aa) where rnum between #{paging.startRow} and #{paging.endRow}
+	</select>
+	
+	<select id="fselectByName" resultType="FindListVo" parameterType="HashMap">
+	     select * from FINDITEM join FINDPIC on finditem.fino = findpic.fipno join area on finditem.fiano = area.ano
+		 where finditem.FISUB like '%'||#{fisub}||'%' AND FIUID = #{userid} order by FINO desc
+	</select>
+	
+	<select id="lselectByName" resultType="LostListVo" parameterType="HashMap">
+	     select * from LOSTITEM join LOSTPIC on lostitem.lono = lostpic.lopno join area on lostitem.loano = area.ano
+		 where lostitem.LOSUB like '%'||#{losub}||'%' AND LOUID = #{userid} order by LONO desc
+	</select>
+	
+	<update id="editPwd" parameterType="HashMap">
+		update USERS set upwd = #{upwd} where userid = #{userid}
+	</update>
+	
+	<update id="editProfile" parameterType="Users">
+		update USERS set uemail = #{uemail}, upnum = #{upnum} where userid = #{userid}
+	</update>
+	
+	<update id="leaveUser" parameterType="String">
+		update USERS set uoutdate = SYSDATE where userid = #{userid}
+	</update>
+</mapper>
